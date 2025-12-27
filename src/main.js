@@ -47,16 +47,23 @@ class BusinessCard extends HTMLElement {
   get whatsappUrl() {
     return this.phone ? `https://wa.me/${this.phone}` : "";
   }
-
+  
   qrSvg() {
-    const vcard = `BEGIN:VCARD
-VERSION:3.0
-FN:${this.name || ""}
-TEL:${this.phone || ""}
-EMAIL:${this.email || ""}
-END:VCARD`;
+    // Formato vCard 3.0 mejorado con saltos de línea CRLF y campos completos
+    const vcard = [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      this.name ? `FN:${this.name}` : null,
+      this.name ? `N:${this.name.split(' ').reverse().join(';')};;;` : null,
+      this.role ? `TITLE:${this.role}` : null,
+      this.phone ? `TEL;TYPE=CELL:${this.phone.replace(/\D/g, '')}` : null,
+      this.email ? `EMAIL;TYPE=INTERNET:${this.email}` : null,
+      this.address ? `ADR;TYPE=WORK:;;${this.address};;;;` : null,
+      'END:VCARD'
+    ].filter(Boolean).join('\r\n');
 
-    return `<img src="https://api.qrserver.com/v1/create-qr-code/?size=72x72&data=${encodeURIComponent(vcard)}"/>`;
+    // Aumentar tamaño para mejor lectura y añadir margen
+    return `<img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=4&data=${encodeURIComponent(vcard)}" style="width:72px;height:72px"/>`;
   }
 
   render() {
